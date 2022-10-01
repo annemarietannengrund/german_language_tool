@@ -56,7 +56,7 @@ page_tocs = {
             {
                 'type': 'switch_content',
                 "target": "numbers_overview",
-                'key': "btn_numbers_overview"
+                'key': "headline_numbers_overview"
             },
             {
                 'type': 'switch_content',
@@ -128,12 +128,17 @@ page_tocs = {
                 "target": "numbers_millions",
                 'key': "btn_numbers_millions"
             },
+            {
+                'type': 'switch_page',
+                "target": "NumberQuizPage",
+                'key': "btn_numbers_quiz_page"
+            },
         ],
         "TOC": {
             "numbers_overview": {
                 "default": True,
                 "content": [
-                    {"type": "headline", "key": 'btn_numbers_overview'},
+                    {"type": "headline", "key": 'headline_numbers_overview'},
                     {"type": "seperator"},
                     {"type": "paragraph", "key": "btn_numbers_overview_paragraph_1"},
                     {"type": "paragraph", "key": "btn_numbers_overview_paragraph_2"},
@@ -657,10 +662,41 @@ page_tocs = {
             },
         }
     },
+    "NumberQuizPage": {
+        "menu": [
+            {
+                'type': 'switch_page',
+                "target": "NumbersPage",
+                'key': "btn_back"
+            },
+            {
+                'type': 'switch_content',
+                "target": "quiz",
+                'key': "quiz"
+            },
+        ],
+        "TOC": {
+            "about": {
+                "default": True,
+                "content": [
+                    {"type": "headline", "key": 'headline_numbers_quiz_page'},
+                    {"type": "seperator"},
+                ]
+            },
+            "quiz": {
+                "type": "quiz",
+                "content": [
+                    {"type": "headline", "key": 'i am a headline for quizzes'},
+                    {"type": "seperator"},
+                ]
+            }
+        }
+    },
 }
 
 
 def save_toc_as_json():
+
     with open("TOC.json", "w") as f:
         f.write(json.dumps(get_toc(), indent=4, sort_keys=False))
 
@@ -670,4 +706,5 @@ def get_toc():
 
 
 if __name__ == "__main__":
-    save_toc_as_json()
+    pass
+    #save_toc_as_json()

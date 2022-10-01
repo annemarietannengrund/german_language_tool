@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter.ttk import Button, Scrollbar, Combobox, Separator
 
+
 class BaseFrame(tk.Frame):
     """Base Frame abstraction layer, to provide basic functionality like translations, layout and other stuff
     for specialized frame classes (PageFrame/ScrollFrame)
@@ -15,16 +16,27 @@ class BaseFrame(tk.Frame):
         self.menu = []
         self.toc = {}
         self.config = {}
+        self.className = str(self.__class__).replace("<class '__main__.", "").replace("'>", "")
 
     page_toc = {}
+
+    def get_frametype(self, frametype):
+        if not frametype:
+            return ScrollBaseFrame(self)
+        if frametype == "quiz":
+            return QuizBaseFrame(self)
+        raise Exception(f"Type '{frametype}' is unknown")
 
     def create_content_frame(self, content_key):
         if (frame := self.controller.get_frame(content_key)):
             return frame
-        content_frame = ScrollBaseFrame(self)
-        content = self.toc.get(content_key).get("content")
-        # wrapsize = 900
-        # print("setting wrapsize to", wrapsize)
+        toc_key = content_key
+        if "." in toc_key:
+            toc_key = content_key.split('.')[1]
+        toc = self.toc.get(toc_key)
+        content = toc.get("content")
+        content_frame_type = toc.get('type')
+        content_frame = self.get_frametype(content_frame_type)
         self.build_page_by_toc(content, content_frame.interior)
         self.controller.register_frame(content_frame, content_key)
         return content_frame
@@ -32,7 +44,7 @@ class BaseFrame(tk.Frame):
     def set_default_content(self):
         for page_key, page_data in self.toc.items():
             if page_data.get("default"):
-                self.default_page = page_key
+                self.default_page = ".".join([self.className, page_key])
                 return
         raise Exception(f"couldnt find default content for {self.__class__}")
 
@@ -93,25 +105,21 @@ class BaseFrame(tk.Frame):
                 element = Button(
                     self.sidebar,
                     command=item.get("function"),
-                    textvariable=textvar
                 )
             elif itype in ["quit_button"]:
                 element = Button(
                     self.sidebar,
                     command=self.controller.quit,
-                    textvariable=textvar
                 )
             elif itype in ["switch_page"]:
                 element = Button(
                     self.sidebar,
                     command=lambda target=item.get("target"): self.controller.show_frame(target, True),
-                    textvariable=textvar
                 )
             elif itype in ["switch_content"]:
                 element = Button(
                     self.sidebar,
                     command=lambda target=item.get("target"): self.change_content(target),
-                    textvariable=textvar
                 )
             elif itype == "language_switcher":
                 element = Combobox(
@@ -126,8 +134,8 @@ class BaseFrame(tk.Frame):
             else:
                 element = tk.Label(
                     self.sidebar,
-                    textvariable=textvar
                 )
+            self.add_text_to_el(element, textvar)
             element.grid(row=i, column=0, sticky=tk.EW, padx=5)
 
     def init_sidebar(self):
@@ -136,14 +144,19 @@ class BaseFrame(tk.Frame):
             self.sidebar.configure(bg='green')
         self.sidebar.grid(row=0, column=0, sticky=tk.NS, padx=5, pady=5)
 
-    def set_headline(self, frame, text, wrapsize=0) -> tk.Label:
+    def add_text_to_el(self, el, text):
+        if type(text) == str:
+            el.config(text=text)
+        elif type(text) == tk.StringVar:
+            el.config(textvariable=text)
+
+    def set_headline(self, frame, text) -> tk.Label:
         label = tk.Label(
             frame,
             anchor=tk.NW,
-            textvariable=text,
-            wraplength=wrapsize,
             justify=tk.LEFT
         )
+        self.add_text_to_el(label, text)
         label.config(font=self.controller.LARGE_FONT)
         label.pack(side=tk.TOP, anchor=tk.NW)
         label.bind('<Configure>', lambda e: label.config(wraplength=label.winfo_width()))
@@ -270,3 +283,8 @@ class PageBaseFrame(BaseFrame):
         self.build_menu(self.get_menu_items())
         self.set_default_content()
         self.change_content(self.default_page)
+
+
+class QuizBaseFrame(ScrollBaseFrame):
+    def __init__(self, parent):
+        super(QuizBaseFrame, self).__init__(parent)

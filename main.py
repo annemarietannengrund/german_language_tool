@@ -32,6 +32,7 @@ class GermanLanguageTool(tk.Tk):
         self.maxsize(self.winfo_screenwidth(), self.winfo_screenheight())
         self.translate_map = {}
         self.translate_raw_map = {}
+        self.translations = {}
         self.available_languages = {}
         self.platform = system()
         self.reserved_words = {}
@@ -96,6 +97,7 @@ class GermanLanguageTool(tk.Tk):
 
     def init_string_var_translation_components(self):
         for key, translation in self.translate_raw_map.items():
+
             translation = self.replace_reserved_words(translation)
             if key in self.translate_map.keys():
                 self.update_translation(key, translation)

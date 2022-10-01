@@ -1,5 +1,7 @@
 # Readme
 
+Python 3.10 required, at least that worked onmy setup.
+
 ```
 brew install python-tk
 

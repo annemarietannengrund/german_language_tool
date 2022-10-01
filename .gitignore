@@ -133,3 +133,5 @@ dmypy.json
 
 # macOS files
 .DS_Store
+
+assets/translated.json
